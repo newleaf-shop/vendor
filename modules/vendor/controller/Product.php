@@ -97,12 +97,21 @@ class Product extends VendorBase
             return $this->error('分类不存在');
         }
 
+        /**
+         * 加载分类的商品属性
+         */
         $SysCategoryProductAttributeM = new SysProductAttribute();
         $attributes = $SysCategoryProductAttributeM->where(['category_id' => $category_id])->select(['id','name', "'' as value",'require']);
 
+        /**
+         * 加载销售属性
+         */
         $SysCategorySpecificationRelaM = new SysCategorySpecificationRela();
         $specifications = $SysCategorySpecificationRelaM->getSpecificationsWithCategoryId($category_id);
-//        print_r($specifications);die();
+
+        /**
+         * 数据组建
+         */
         foreach ($specifications as &$specification) {
             switch ($specification['type']){
                 case SysSpecification::TYPE_COLOR:
@@ -129,6 +138,7 @@ class Product extends VendorBase
                     $specification['options'] = [];
                     break;
                 case SysSpecification::TYPE_SIZE_FOR_SHOES:
+
                     break;
                 default:
                     $specification['curEditInputIndex'] = 0;

@@ -8,7 +8,7 @@
 return [
     'api_config'=>[
         'scheme'=>'http',
-        'host'=>'user.zzpzero.com',
+        'host'=>'user.newleaf-shop.com',
         'port'=>8001
     ]
 ];

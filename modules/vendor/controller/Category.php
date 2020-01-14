@@ -12,6 +12,7 @@ namespace app\vendor\controller;
 use app\vendor\common\VendorBase;
 use app\vendor\model\VendorCategoryRela;
 use Jasmine\library\http\Request;
+use Jasmine\util\Arr;
 
 class Category extends VendorBase
 {
@@ -40,10 +41,14 @@ class Category extends VendorBase
         $VendorCategoryRelaM = new VendorCategoryRela();
 
         /**
-         * 获取数据
+         * 获取所有数据
          */
         $list = $VendorCategoryRelaM->getCategoryListByVendorId($this->vendor['id']);
 
+        /**
+         * 构扁平数据
+         * 全链路
+         */
         $this->buildCategory($list,$categories);
 
         /**
@@ -66,22 +71,36 @@ class Category extends VendorBase
         $VendorCategoryRelaM = new VendorCategoryRela();
 
         /**
-         * 获取数据
+         * 从数据库中获取数据
          */
         $list = $VendorCategoryRelaM->getCategoryListByVendorId($this->vendor['id']);
 
-        $result = findChildren($list,$parent_id);
+        /**
+         * 查找子项
+         */
+        $result = Arr::findChildren($list,$parent_id);
 
         foreach ($result['children'] as &$child) {
+
+            /**
+             * 生成上游路径
+             */
             $paths = array_reverse($this->getPaths($child,$result['remain']));
 
+            /**
+             * 组成数据
+             */
             $child['id'] = (int)$child['id'];
             $child['parent_id'] = (int)$child['parent_id'];
             $child['is_leaf'] = false;
             $child['names'] = array_column($paths,'name');
             $child['paths'] = $paths;
             $child['full_name'] = implode('>',$child['names']);
-            $res = findChildren($result['remain'],$child['id']);
+
+            /**
+             * 判断是否还有子节点
+             */
+            $res = Arr::findChildren($result['remain'],$child['id']);
             if(empty($res['children'])){
                 $child['is_leaf'] = true;
             }
@@ -111,13 +130,14 @@ class Category extends VendorBase
     /**
      * @param $id
      * @param $data
+     * @param string $field
      * @return mixed|null
-     * itwri 2019/12/17 18:09
+     * itwri 2020/1/7 17:19
      */
-    protected function findItem($id,$data){
+    protected function findItem($id,$data,$field = 'id'){
         if(is_array($data)){
             foreach ($data as $datum) {
-                if(isset($datum['id']) && $datum['id'] == $id){
+                if(isset($datum[$field]) && $datum[$field] == $id){
                     return $datum;
                 }
             }
@@ -134,12 +154,22 @@ class Category extends VendorBase
      */
     protected function buildCategory($list, &$result = [], $parent_id = 0, $names = [])
     {
-        $res = findChildren($list, $parent_id);
+        /**
+         * 找到子项
+         */
+        $res = Arr::findChildren($list, $parent_id);
         if (!empty($res['children'])) {
+            //如果存在子项
             foreach ($res['children'] as $child) {
+                //复制使用
                 $paths = $names;
+                //追加名称
                 array_push($paths, $child['name']);
-                $res1 = findChildren($res['remain'], $child['id']);
+
+                /**
+                 * 继续查找下一级
+                 */
+                $res1 = Arr::findChildren($res['remain'], $child['id']);
                 if (empty($res1['children'])) {
                     unset($child['parent_id']);
 

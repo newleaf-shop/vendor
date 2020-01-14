@@ -105,7 +105,12 @@ class Index extends VendorBase
             /*
              * 记录登录动作
              */
-            VendorLog::record($user['id'], $vendor['id'], __METHOD__, __FUNCTION__, $this->request()->ip(), $remark, json_encode(['user' => $user, 'vendor' => $vendor]));
+            VendorLog::record($user['id'], $vendor['id'], __METHOD__, __FUNCTION__, $this->request()->ip(), $remark, json_encode(['user' => $user, 'vendor' => $vendor,'Vendor-Token'=>$authToken]));
+
+            /**
+             * 设置cookie
+             */
+            setcookie('Vendor-Token',$authToken);
 
         } catch (\Exception $exception) {
             return $this->error($exception->getMessage());
