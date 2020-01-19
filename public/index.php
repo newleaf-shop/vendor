@@ -5,7 +5,7 @@
  * Date: 2019/8/4
  * Time: 16:55
  */
-echo "SDF";die;
+
 header('Access-Control-Allow-Origin:*'); //支持全域名访问，不安全，部署后需要固定限制为客户端网址
 header('Access-Control-Allow-Methods:OPTIONS,GET,POST,PUT,DELETE'); // 允许option，get，post put delete请求
 header('Access-Control-Allow-Headers:x-requested-with,content-type,Authorization,Ant-device,ant-device,sign,time,version,User-Token,Vendor-Token'); // 允许x-requested-with请求头
