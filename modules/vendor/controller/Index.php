@@ -13,6 +13,7 @@ use app\vendor\model\Vendor;
 use app\vendor\model\VendorEmployee;
 use app\vendor\model\VendorLog;
 use app\vendor\model\VendorToken;
+use app\vendor\services\User;
 use Jasmine\App;
 use Jasmine\helper\Config;
 use Jasmine\library\http\Curl;
@@ -49,21 +50,16 @@ class Index extends VendorBase
             $user_token = $request->header('User-Token', '');
             $vendor_id = $request->get('vendor_id', 0, 'intval');
 
-            $url = (new Url())->set(Config::get('user.api_config'))->set('path', "/user/index/isLogin")->toString();
             /**
-             * 调用
+             * 调用远程服务
+             * 检查用户是否已登录
              */
-            $response = Curl::get($url,[], ['User-Token' => $user_token]);
+            $user = User::isLogin($user_token);
 
-            $response = json_decode($response, 1);
-            if (!$response || !isset($response['code']) || $response['code'] != 200) {
-                return $this->error('请登录',-1,$response);
+
+            if ($user == false) {
+                return $this->error(3001);
             }
-
-            /**
-             * 返回正常时
-             */
-            $user = $response['data'];
 
             $remark = "主账号登录";
             /**
@@ -78,7 +74,7 @@ class Index extends VendorBase
                 $VendorEmployeeM = new VendorEmployee();
                 $employee = $VendorEmployeeM->check($vendor_id, $user['id']);
                 if ($employee == false) {
-                    return $this->error('您没有权限');
+                    return $this->error(4001);
                 }
 
                 $remark = "子账号授权登录";
@@ -97,7 +93,7 @@ class Index extends VendorBase
              */
             if ($info = $VendorTokenM->checkUser($user_token, $vendor['id'], $user['id'], $request->ip()) !== false) {
                 $VendorTokenM->setInc('login_count', 1);
-                return $this->success('已经登录', ['ip' => $this->request()->ip(), 'vendor_token' => $authToken]);
+                return $this->success(2001, ['ip' => $this->request()->ip(), 'vendor_token' => $authToken]);
             }
 
             $VendorTokenM->save($authToken,$vendor['id'],$user['id'],$user_token,$request->ip(),date('Y-m-d H:i:s',strtotime('+1 day')));
@@ -116,6 +112,6 @@ class Index extends VendorBase
             return $this->error($exception->getMessage());
         }
 
-        return $this->success('授权成功', ['ip' => $this->request()->ip(), 'vendor_token' => $authToken]);
+        return $this->success(2002, ['ip' => $this->request()->ip(), 'vendor_token' => $authToken]);
     }
 }

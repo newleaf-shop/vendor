@@ -17,11 +17,10 @@ class VendorToken extends Model
     /**
      * 校验
      * @param $token
-     * @param $vendor_id
-     * @param $user_id
      * @param $ip
      * @return bool|mixed
-     * itwri 2019/11/28 13:10
+     * @throws \Exception
+     * itwri 2020/1/15 16:50
      */
     function check($token,$ip)
     {
@@ -37,6 +36,15 @@ class VendorToken extends Model
             ->find();
     }
 
+    /**
+     * @param $token
+     * @param $vendor_id
+     * @param $user_id
+     * @param $ip
+     * @return bool|mixed
+     * @throws \Exception
+     * itwri 2020/1/15 16:50
+     */
     function checkUser($token,$vendor_id,$user_id, $ip)
     {
         /**

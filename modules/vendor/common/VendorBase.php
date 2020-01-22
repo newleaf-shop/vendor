@@ -19,6 +19,11 @@ class VendorBase extends Base
     protected $vendor_token = '';
     protected $vendor = null;
 
+    /**
+     * VendorBase constructor.
+     * @param App|null $app
+     * @throws \Exception
+     */
     function __construct(App $app = null)
     {
         parent::__construct($app);
@@ -37,7 +42,7 @@ class VendorBase extends Base
 
             //校验token
             if (($this->vendor = $VendorTokenM->check($this->vendor_token,$ip))==false) {
-                echo $this->error("请登录");
+                echo $this->error(3001);
                 die();
             }
         }
